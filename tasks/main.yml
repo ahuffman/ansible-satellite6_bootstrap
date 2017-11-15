@@ -1,0 +1,77 @@
+---
+- name: Ensure RHN Tools are removed
+  yum:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - yum-rhn-plugin
+    - osad
+
+- name: Ensure katello-ca-consumer-latest is Installed
+  yum:
+    name: "http://{{ sat6_server }}/pub/katello-ca-consumer-latest.noarch.rpm"
+    state: present
+
+- name: Remove RHN System ID
+  file:
+    path: /etc/sysconfig/rhn/systemid
+    state: absent
+
+- name: Register System to Satellite 6
+  redhat_subscription:
+    state: present
+    autosubscribe: true
+    activationkey: "{{ sat6_activation_key }}"
+    org_id: "{{ sat6_organization }}"
+
+- name: Enable Specific Repositories
+  shell: 'subscription-manager repos --enable="{{ item }}"'
+  with_items: "{{ sat6_enable_repos }}"
+  when: sat6_enable_repos|length > 0
+
+- name: Ensure katello-agent is Installed
+  yum:
+    name: katello-agent
+    state: latest
+
+- name: Ensure goferd (katello-agent) is Started and Enabled
+  service:
+    name: goferd
+    state: started
+    enabled: yes
+
+- name: Enable Remote Execution by Distributing foreman-proxy user's public key
+  authorized_key:
+    user: root
+    key: '{{ item }}'
+    state: present
+  with_file:
+    - id_rsa_foreman_proxy.pub
+  tags:
+    - ssh-keys
+  when: sat6_remote_execution == true
+
+- name: Satellite 6 Puppet Configuration
+  block:
+    - name: Ensure Puppet Agent is installed
+      yum:
+        name: puppet
+        state: latest
+    
+    - name: Configure Puppet Agent
+      template:
+        src: puppet.conf.j2
+        dest: /etc/puppet/puppet.conf
+    
+    - name: Ensure Puppet Agent Started and Enabled
+      service:
+        name: puppet
+        state: started
+        enabled: yes
+    
+    - name: Create Puppet Certificate Signing Request
+      shell: puppet agent -t --server {{ sat6_server }}
+      changed_when: false
+  tags:
+    - puppet
+  when: sat6_puppet == true
