@@ -25,8 +25,7 @@
     org_id: "{{ sat6_organization }}"
 
 - name: Enable Specific Repositories
-  shell: 'subscription-manager repos --enable="{{ item }}"'
-  with_items: "{{ sat6_enable_repos }}"
+  shell: 'subscription-manager repos --enable={{ sat6_enable_repos | join(" --enable=") }}'
   when: sat6_enable_repos|length > 0
 
 - name: Ensure katello-agent is Installed
