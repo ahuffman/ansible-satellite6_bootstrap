@@ -43,6 +43,7 @@
   authorized_key:
     user: root
     key: '{{ item }}'
+    path: "{{ sat6_auth_key_path | default(omit) }}"
     state: present
   with_file:
     - id_rsa_foreman_proxy.pub
@@ -55,6 +56,11 @@
     - name: Ensure Puppet Agent is installed
       yum:
         name: puppet
+        state: latest
+
+    - name: Ensure facter is installed
+      yum:
+        name: facter
         state: latest
     
     - name: Configure Puppet Agent

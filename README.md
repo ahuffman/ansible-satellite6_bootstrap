@@ -8,6 +8,7 @@ To provide a method to painlessly move Satellite 5 clients to Satellite 6 by mak
 `sat6_organization`: **Required** - Organization to register the host in on the Satellite6 server.  
 `sat6_enable_repos`: [] **Optional** - List of repositories to enable after Satellite6 registration is complete.  Defaults to an empty list.  
 `sat6_remote_execution`: **Optional** - true | false - Defaults to false.  Place a file named `id_rsa_foreman_proxy.pub` in this role's `files` directory.  You can retrieve this file from your Satellite6 server.    
+`sat6_auth_key_path`: **Optional** - Path to your authorized keys file if it is not /home/<user>/.ssh/authorized_keys.   
 `sat6_puppet`: **Optional** - true | false - Defaults to false.  Whether or not to perform Puppet installation and configuration.  
 
 ## Example Playbook

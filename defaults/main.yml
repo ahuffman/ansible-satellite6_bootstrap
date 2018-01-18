@@ -1,7 +1,8 @@
-
+---
 sat6_server: 
 sat6_activation_key: 
 sat6_organization: 
 sat6_enable_repos: []
 sat6_remote_execution: false
+sat6_auth_key_path:
 sat6_puppet: false
