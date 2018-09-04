@@ -1,0 +1,13 @@
+---
+sat6_rhn_tools:
+  - "rhn-setup"
+  - "rhn-client-tools"
+  - "yum-rhn-plugin"
+  - "rhnsd"
+  - "rhn-check"
+  - "rhn-lib"
+  - "spacewalk-abrt"
+  - "spacewalk-oscap"
+  - "osad"
+  - "rh-*-rhui-client"
+  - "candlepin-cert-consumer-*"
