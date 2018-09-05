@@ -33,7 +33,7 @@
 # For https install of katello-ca-consumer-latest
 - name: "Ensure katello-ca-consumer-latest is installed | https"
   block:
-    - name: "Ensure we have the Satellite Server's CA for validating authentication"
+    - name: "Verify Satellite Server's CA exists on client"
       stat:
         path: "/etc/pki/ca-trust/source/anchors/katello-server-ca.crt"
       register: "sat6_ca_cert"
@@ -83,6 +83,11 @@
     name: "{{ item }}"
     state: "latest"
   with_items: "{{ sat6_sub_mgr_pkgs }}"
+
+- name: "Ensure subscription-manager-gnome is removed"
+  yum:
+    name: "subscription-manager-gnome"
+    state: "absent"
 
 - name: "Enable Remote Execution by Distributing foreman-proxy user's public key"
   authorized_key:
