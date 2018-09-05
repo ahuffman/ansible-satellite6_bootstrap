@@ -23,6 +23,8 @@
     ignoreschedules = true
     daemon = false
     ca_server = {{ sat6_server }}
+    certname = {{ ansible_fqdn }}
+    environment = {{ sat6_puppet_environment }}
     server = {{ sat6_server }}
 
     # Where puppetd caches the local configuration.  An

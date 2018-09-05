@@ -11,3 +11,22 @@ sat6_rhn_tools:
   - "osad"
   - "rh-*-rhui-client"
   - "candlepin-cert-consumer-*"
+
+sat6_puppet_files:
+  - "/var/lib/puppet"
+  - "/opt/puppetlabs/puppet/cache"
+  - "/opt/puppetlabs/puppet/ssl"
+
+sat6_sub_mgr_pkgs:
+  - "yum"
+  - "openssl"
+  - "python"
+  - "subscription-manager"
+  - "subscription-manager-migration-*"
+
+sat6_katello_pkgs:
+  - "katello-ca-consumer-*"
+  - "katello-agent"
+  - "gofer"
+  - "katello-host-tools"
+  - "katello-host-tools-fact-plugin"

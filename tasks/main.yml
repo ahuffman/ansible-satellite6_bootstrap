@@ -1,80 +1,147 @@
 ---
-- name: Ensure RHN Tools are removed
+- name: "Ensure RHN Tools are removed"
   yum:
     name: "{{ item }}"
     state: "absent"
   with_items: "{{ sat6_rhn_tools }}"
 
-- name: Ensure katello-ca-consumer-latest is Installed
-  yum:
-    name: "http://{{ sat6_server }}/pub/katello-ca-consumer-latest.noarch.rpm"
-    state: "present"
-
-- name: Remove RHN System ID
+- name: "Ensure RHN System ID is removed"
   file:
     path: "/etc/sysconfig/rhn/systemid"
     state: "absent"
 
-- name: Register System to Satellite 6
+- name: "Cleanup Katello"
+  block:
+    - name: "Ensure Katello Packages are removed"
+      yum:
+        name: "{{ item }}"
+        state: "absent"
+        with_items: "{{ sat6_katello_pkgs }}"
+
+    - name: "Ensure katello-server-ca.pem is removed"
+      file:
+        path: "/etc/rhsm/ca/katello-server-ca.pem"
+        state: "absent"
+  when: "sat6_force_katello"
+
+- name: "Ensure katello-ca-consumer-latest is installed"
+  yum:
+    name: "http://{{ sat6_server }}/pub/katello-ca-consumer-latest.noarch.rpm"
+    state: "present"
+  when: "not sat6_https"
+
+# For https install of katello-ca-consumer-latest
+- name: "Ensure katello-ca-consumer-latest is installed | https"
+  block:
+    - name: "Ensure we have the Satellite Server's CA for validating authentication"
+      stat:
+        path: "/etc/pki/ca-trust/source/anchors/katello-server-ca.crt"
+      register: "sat6_ca_cert"
+
+    - name: "Obtain Satellite Server's CA"
+      block:
+        - name: "Download CA Certificate"
+          get_url:
+            url: "http://{{ sat6_server }}/pub/katello-server-ca.crt"
+            dest: "/etc/pki/ca-trust/source/anchors/katello-server-ca.crt"
+
+        - name: "Update CA trust"
+          command: "update-ca-trust"
+      when: "not sat6_ca_cert.stat.exists"
+      become: True
+
+    - name: "Ensure katello-ca-consumer-latest is installed | https"
+      yum:
+        name: "https://{{ sat6_server }}/pub/katello-ca-consumer-latest.noarch.rpm"
+        state: "present"
+  when: "sat6_https"
+
+- name: "Register client to Satellite 6"
   redhat_subscription:
-    state: present
-    autosubscribe: True
+    state: "present"
+    auto_attach: True
     activationkey: "{{ sat6_activation_key }}"
     org_id: "{{ sat6_organization }}"
 
-- name: Enable Specific Repositories
+- name: "Enable specified repositories"
   shell: 'subscription-manager repos --enable={{ sat6_enable_repos | join(" --enable=") }}'
   when: "sat6_enable_repos|length > 0"
 
-- name: Ensure katello-agent is Installed
+- name: "Ensure katello-agent is installed"
   yum:
     name: "katello-agent"
     state: "latest"
 
-- name: Ensure goferd (katello-agent) is Started and Enabled
+- name: "Ensure goferd (katello-agent) is started and enabled"
   service:
     name: "goferd"
     state: "started"
     enabled: True
 
-- name: Enable Remote Execution by Distributing foreman-proxy user's public key
+- name: "Ensure subscription-manager dependencies are updated"
+  yum:
+    name: "{{ item }}"
+    state: "latest"
+  with_items: "{{ sat6_sub_mgr_pkgs }}"
+
+- name: "Enable Remote Execution by Distributing foreman-proxy user's public key"
   authorized_key:
-    user: "root"
+    user: "{{ sat6_remote_execution_user }}"
     key: "{{ item }}"
-    path: "{{ sat6_auth_key_path | default(omit) }}"
+    path: "{{ sat6_remote_execution_auth_key_path | default(omit) }}"
     state: "present"
   with_file:
-    - "id_rsa_foreman_proxy.pub"
+    - "{{ sat6_server }}-id_rsa_foreman_proxy.pub"
   tags:
     - "ssh-keys"
   when: "sat6_remote_execution"
 
-- name: Satellite 6 Puppet Configuration
+- name: "Satellite 6 Puppet Configuration"
   block:
-    - name: Ensure Puppet Agent is installed
+    - name: "Cleanup Puppet"
+      block:
+        - name: "Ensure puppet is removed"
+          yum:
+            name: "puppet"
+            state: "absent"
+
+        - name: "Cleanup puppet files"
+          file:
+            path: "{{ item }}"
+            state: "absent"
+          with_items: "{{ sat6_puppet_files }}"
+      when: "sat6_force_puppet"
+
+    - name: "Ensure puppet is installed"
       yum:
         name: "puppet"
         state: "latest"
 
-    - name: Ensure facter is installed
+    - name: "Ensure facter is installed"
       yum:
         name: "facter"
         state: "latest"
 
-    - name: Configure Puppet Agent
+    - name: "Configure puppet"
       template:
         src: "puppet.conf.j2"
         dest: "/etc/puppet/puppet.conf"
 
-    - name: Ensure Puppet Agent Started and Enabled
+    - name: "Ensure puppet is started and enabled"
       service:
         name: "puppet"
         state: "started"
         enabled: True
 
-    - name: Create Puppet Certificate Signing Request
+    - name: "Puppet certificate signing request"
       shell: 'puppet agent -t --server {{ sat6_server }}'
       changed_when: False
   tags:
     - "puppet"
   when: "sat6_puppet"
+
+  - name: "Update Client System"
+    yum:
+      name: "*"
+      state: "latest"
+    when: "sat6_update_client"

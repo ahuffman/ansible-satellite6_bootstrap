@@ -1,8 +1,14 @@
 ---
-sat6_server: 
-sat6_activation_key: 
-sat6_organization: 
+sat6_server: ""
+sat6_organization: ""
+sat6_activation_key: ""
 sat6_enable_repos: []
-sat6_remote_execution: false
-sat6_auth_key_path:
-sat6_puppet: false
+sat6_remote_execution: False
+sat6_remote_execution_user: "root"
+sat6_remote_execution_auth_key_path: ""
+sat6_puppet: False
+sat6_puppet_environment: "production"
+sat6_force_puppet: False
+sat6_update_client: False
+sat6_force_katello: False
+sat6_https: False
