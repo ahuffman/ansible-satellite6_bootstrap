@@ -3,11 +3,13 @@
   yum:
     name: "{{ sat6_rhn_tools }}"
     state: "absent"
+  become: True
 
 - name: "Ensure RHN System ID is removed"
   file:
     path: "/etc/sysconfig/rhn/systemid"
     state: "absent"
+  become: True
 
 - name: "Cleanup Katello"
   include_tasks: "force-katello.yml"
@@ -18,8 +20,8 @@
     name: "http://{{ sat6_server }}/pub/katello-ca-consumer-latest.noarch.rpm"
     state: "present"
   when: "not sat6_https"
+  become: True
 
-# For https install of katello-ca-consumer-latest
 - name: "Ensure katello-ca-consumer-latest is installed | https"
   include_tasks: "katello-ca-consumer-latest-https.yml"
   when: "sat6_https"
@@ -30,31 +32,37 @@
     auto_attach: True
     activationkey: "{{ sat6_activation_key }}"
     org_id: "{{ sat6_organization }}"
+  become: True
 
 - name: "Enable specified repositories"
   shell: 'subscription-manager repos --enable={{ sat6_enable_repos | join(" --enable=") }}'
   when: "sat6_enable_repos|length > 0"
+  become: True
 
 - name: "Ensure katello-agent is installed"
   yum:
     name: "katello-agent"
     state: "latest"
+  become: True
 
 - name: "Ensure goferd (katello-agent) is started and enabled"
   service:
     name: "goferd"
     state: "started"
     enabled: True
+  become: True
 
 - name: "Ensure subscription-manager dependencies are updated"
   yum:
     name: "{{ sat6_sub_mgr_pkgs }}"
     state: "latest"
+  become: True
 
 - name: "Ensure subscription-manager-gnome is removed"
   yum:
     name: "subscription-manager-gnome"
     state: "absent"
+  become: True
 
 - name: "Enable Remote Execution by Distributing foreman-proxy user's public key"
   include_tasks: "rex.yml"
@@ -71,3 +79,4 @@
     name: "*"
     state: "latest"
   when: "sat6_update_client"
+  become: True
