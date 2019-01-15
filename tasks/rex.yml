@@ -1,0 +1,11 @@
+---
+- name: "Enable remote execution"
+  authorized_key:
+    user: "{{ sat6_remote_execution_user }}"
+    key: "{{ item }}"
+    path: "{{ sat6_remote_execution_auth_key_path | default(omit) }}"
+    state: "present"
+  with_file:
+    - "{{ sat6_server }}-id_rsa_foreman_proxy.pub"
+  tags:
+    - "ssh-keys"
