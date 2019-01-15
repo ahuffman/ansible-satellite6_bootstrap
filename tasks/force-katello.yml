@@ -3,8 +3,10 @@
   yum:
     name: "{{ sat6_katello_pkgs }}"
     state: "absent"
+  become: True
 
 - name: "Ensure katello-server-ca.pem is removed"
   file:
     path: "/etc/rhsm/ca/katello-server-ca.pem"
     state: "absent"
+  become: True

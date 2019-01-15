@@ -9,3 +9,4 @@
     - "{{ sat6_server }}-id_rsa_foreman_proxy.pub"
   tags:
     - "ssh-keys"
+  become: True
