@@ -1,9 +1,8 @@
 ---
 - name: "Ensure RHN Tools are removed"
   yum:
-    name: "{{ item }}"
+    name: "{{ sat6_rhn_tools }}"
     state: "absent"
-  with_items: "{{ sat6_rhn_tools }}"
 
 - name: "Ensure RHN System ID is removed"
   file:
@@ -14,9 +13,8 @@
   block:
     - name: "Ensure Katello Packages are removed"
       yum:
-        name: "{{ item }}"
+        name: "{{ sat6_katello_pkgs }}"
         state: "absent"
-        with_items: "{{ sat6_katello_pkgs }}"
 
     - name: "Ensure katello-server-ca.pem is removed"
       file:
@@ -80,9 +78,8 @@
 
 - name: "Ensure subscription-manager dependencies are updated"
   yum:
-    name: "{{ item }}"
+    name: "{{ sat6_sub_mgr_pkgs }}"
     state: "latest"
-  with_items: "{{ sat6_sub_mgr_pkgs }}"
 
 - name: "Ensure subscription-manager-gnome is removed"
   yum:
