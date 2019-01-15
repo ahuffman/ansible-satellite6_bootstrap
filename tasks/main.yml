@@ -10,16 +10,7 @@
     state: "absent"
 
 - name: "Cleanup Katello"
-  block:
-    - name: "Ensure Katello Packages are removed"
-      yum:
-        name: "{{ sat6_katello_pkgs }}"
-        state: "absent"
-
-    - name: "Ensure katello-server-ca.pem is removed"
-      file:
-        path: "/etc/rhsm/ca/katello-server-ca.pem"
-        state: "absent"
+  include_tasks: "force-katello.yml"
   when: "sat6_force_katello"
 
 - name: "Ensure katello-ca-consumer-latest is installed"
@@ -30,28 +21,7 @@
 
 # For https install of katello-ca-consumer-latest
 - name: "Ensure katello-ca-consumer-latest is installed | https"
-  block:
-    - name: "Verify Satellite Server's CA exists on client"
-      stat:
-        path: "/etc/pki/ca-trust/source/anchors/katello-server-ca.crt"
-      register: "sat6_ca_cert"
-
-    - name: "Obtain Satellite Server's CA"
-      block:
-        - name: "Download CA Certificate"
-          get_url:
-            url: "http://{{ sat6_server }}/pub/katello-server-ca.crt"
-            dest: "/etc/pki/ca-trust/source/anchors/katello-server-ca.crt"
-
-        - name: "Update CA trust"
-          command: "update-ca-trust"
-      when: "not sat6_ca_cert.stat.exists"
-      become: True
-
-    - name: "Ensure katello-ca-consumer-latest is installed | https"
-      yum:
-        name: "https://{{ sat6_server }}/pub/katello-ca-consumer-latest.noarch.rpm"
-        state: "present"
+  include_tasks: "katello-ca-consumer-latest-https.yml"
   when: "sat6_https"
 
 - name: "Register client to Satellite 6"
