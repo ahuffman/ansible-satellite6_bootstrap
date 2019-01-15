@@ -1,0 +1,39 @@
+---
+- name: "Cleanup Puppet"
+  block:
+    - name: "Ensure puppet is removed"
+      yum:
+        name: "puppet"
+        state: "absent"
+
+    - name: "Cleanup puppet files"
+      file:
+        path: "{{ item }}"
+        state: "absent"
+      with_items: "{{ sat6_puppet_files }}"
+  when: "sat6_force_puppet"
+
+- name: "Ensure puppet is installed"
+  yum:
+    name: "puppet"
+    state: "latest"
+
+- name: "Ensure facter is installed"
+  yum:
+    name: "facter"
+    state: "latest"
+
+- name: "Configure puppet"
+  template:
+    src: "puppet.conf.j2"
+    dest: "/etc/puppet/puppet.conf"
+
+- name: "Ensure puppet is started and enabled"
+  service:
+    name: "puppet"
+    state: "started"
+    enabled: True
+
+- name: "Puppet certificate signing request"
+  shell: 'puppet agent -t --server {{ sat6_server }}'
+  changed_when: False
