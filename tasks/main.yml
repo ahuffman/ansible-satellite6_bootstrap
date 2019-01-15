@@ -35,8 +35,10 @@
   become: True
 
 - name: "Enable specified repositories"
-  shell: 'subscription-manager repos --enable={{ sat6_enable_repos | join(" --enable=") }}'
-  when: "sat6_enable_repos|length > 0"
+  rhsm_repository:
+    name: "{{ sat6_enable_repos }}"
+    state: "enabled"
+  when: "sat6_enable_repos | length > 0"
   become: True
 
 - name: "Ensure katello-agent is installed"
