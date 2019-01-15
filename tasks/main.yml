@@ -145,8 +145,8 @@
     - "puppet"
   when: "sat6_puppet"
 
-  - name: "Update Client System"
-    yum:
-      name: "*"
-      state: "latest"
-    when: "sat6_update_client"
+- name: "Update Client System"
+  yum:
+    name: "*"
+    state: "latest"
+  when: "sat6_update_client"
