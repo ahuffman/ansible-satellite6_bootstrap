@@ -1,4 +1,12 @@
 ---
+# We need this to happen first in case a system does not have
+#   subscription-manager installed prior to ripping out rhn-tooling
+- name: "Ensure subscription-manager dependencies are present and updated"
+  yum:
+    name: "{{ sat6_sub_mgr_pkgs }}"
+    state: "latest"
+  become: True
+
 - name: "Ensure RHN Tools are removed"
   yum:
     name: "{{ sat6_rhn_tools }}"
@@ -52,12 +60,6 @@
     name: "goferd"
     state: "started"
     enabled: True
-  become: True
-
-- name: "Ensure subscription-manager dependencies are updated"
-  yum:
-    name: "{{ sat6_sub_mgr_pkgs }}"
-    state: "latest"
   become: True
 
 - name: "Ensure subscription-manager-gnome is removed"
