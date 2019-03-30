@@ -1,6 +1,7 @@
 galaxy_info:
-  author: Andrew J. Huffman
-  description: To provide a method to painlessly move Satellite 5 clients to Satellite 6 by making use of Ansible.
+  role_name: "satellite6_bootstrap"
+  author: "Andrew J. Huffman"
+  description: "Provides a painless method to migrate clients between Satellite5/Spacewalk and Satellite6/Capsules."
   #company: your company (optional)
 
   # If the issue tracker for your role is not on github, uncomment the
@@ -14,9 +15,9 @@ galaxy_info:
   # - GPLv3
   # - Apache
   # - CC-BY
-  license: MIT
+  license: "MIT"
 
-  min_ansible_version: 1.2
+  min_ansible_version: "2.5"
 
   # If this a Container Enabled role, provide the minimum Ansible Container version.
   # min_ansible_container_version:
@@ -33,24 +34,26 @@ galaxy_info:
   # platforms is a list of platforms, and each platform has a name and a list of versions.
   #
   platforms:
-    - name: Fedora
+    - name: "Fedora"
       versions:
-      - all
-    - name: EL
+      - "all"
+    - name: "EL"
       versions:
-      - all
+      - "all"
   #   - 1.0
   #   - 7
   #   - 99.99
 
   galaxy_tags:
-    - satellite
-    - satellite 6
-    - satellite6
-    - migration
-    - cloud
-    - satellite5
-    - satellite 5
+    - "satellite"
+    - "satellite6"
+    - "migration"
+    - "cloud"
+    - "satellite5"
+    - "spacewalk"
+    - "katello"
+    - "foreman"
+    - "capsule"
     # List tags for your role here, one per line. A tag is a keyword that describes
     # and categorizes the role. Users find roles by searching for tags. Be sure to
     # remove the '[]' above, if you add tags to this list.
