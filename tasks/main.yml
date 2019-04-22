@@ -73,7 +73,7 @@
       command: '/usr/sbin/rhn-migrate-classic-to-rhsm \
                   --force --destination-url=https://{{ sat6_server }}:{{ sat6_rhsm_port }}/rhsm \
                   --org={{ sat6_organization }} \
-                  --activationkey={{ sat6_activation_key }} \
+                  --activation-key={{ sat6_activation_key }} \
                   {% if sat6_legacy_purge and sat6_legacy_user != "" and sat6_legacy_pass != "" %}
                   --legacy-login={{ sat6_legacy_user }} \
                   --legacy-password={{ sat6_legacy_pass }} \
