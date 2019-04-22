@@ -71,7 +71,7 @@
 
     - name: "Migrate client to Satellite 6"
       command: '/usr/sbin/rhn-migrate-classic-to-rhsm \
-                  --force --destination-url=https://{{ sat6_host }}:{{ sat6_rhsm_port }}/rhsm \
+                  --force --destination-url=https://{{ sat6_server }}:{{ sat6_rhsm_port }}/rhsm \
                   --organization={{ sat6_organization }} \
                   --activationkey={{ sat6_activation_key }} \
                   {% if sat6_legacy_purge and sat6_legacy_user != "" and sat6_legacy_pass != "" %}
