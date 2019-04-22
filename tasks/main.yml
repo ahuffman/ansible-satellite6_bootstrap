@@ -7,12 +7,6 @@
     state: "latest"
   become: True
 
-- name: "Ensure RHN System ID is removed"
-  file:
-    path: "/etc/sysconfig/rhn/systemid"
-    state: "absent"
-  become: True
-
 - name: "Cleanup Katello"
   include_tasks: "force-katello.yml"
   when: "sat6_force_katello"
@@ -132,6 +126,12 @@
 - name: "Ensure RHN Tools are removed"
   yum:
     name: "{{ sat6_rhn_tools }}"
+    state: "absent"
+  become: True
+
+- name: "Ensure RHN System ID is removed"
+  file:
+    path: "/etc/sysconfig/rhn/systemid"
     state: "absent"
   become: True
 
