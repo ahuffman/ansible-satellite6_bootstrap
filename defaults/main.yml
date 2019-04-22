@@ -1,5 +1,7 @@
 ---
 sat6_server: ""
+sat6_user: ""
+sat6_pass: ""
 sat6_organization: ""
 sat6_activation_key: ""
 sat6_enable_repos: []
@@ -12,3 +14,8 @@ sat6_force_puppet: False
 sat6_update_client: False
 sat6_force_katello: False
 sat6_https: False
+sat6_legacy_purge: False
+sat6_legacy_user: ""
+sat6_legacy_pass: ""
+sat6_rhsm_port: "443"
+sat6_os_release: ""

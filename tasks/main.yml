@@ -7,12 +7,6 @@
     state: "latest"
   become: True
 
-- name: "Ensure RHN Tools are removed"
-  yum:
-    name: "{{ sat6_rhn_tools }}"
-    state: "absent"
-  become: True
-
 - name: "Ensure RHN System ID is removed"
   file:
     path: "/etc/sysconfig/rhn/systemid"
@@ -34,12 +28,72 @@
   include_tasks: "katello-ca-consumer-latest-https.yml"
   when: "sat6_https"
 
+- name: "Ensure host is created in Satellite 6"
+  include_role:
+    name: "ahuffman.sat6_create_hosts"
+  vars:
+    sat6_fail_on_existing: False
+    sat6_fqdn: "{{ sat6_server }}"
+    sat6_hosts:
+      - name: "{{ ansible_hostname }}"
+        domain: "{{ ansible_domain }}"
+        host_group: "{{ sat6_host_group }}"
+        ipv4: "{{ ansible_default_ipv4.address }}"
+        location: "{{ sat6_location }}"
+        register_only: True
+
+- name: "Ensure yum plugins are properly configured"
+  block:
+    - name: "Ensure product-id yum plugin is enabled"
+      ini_file:
+        path: "/etc/yum/pluginconf.d/product-id.conf"
+        section: "main"
+        option: "enabled"
+        value: "1"
+        state: "present"
+
+    - name: "Ensure subscription-manager yum plugin is enabled"
+      ini_file:
+        path: "/etc/yum/pluginconf.d/subscription-manager.conf"
+        section: "main"
+        option: "enabled"
+        value: "1"
+        state: "present"
+  become: True
+
 - name: "Register client to Satellite 6"
-  redhat_subscription:
-    state: "present"
-    auto_attach: True
-    activationkey: "{{ sat6_activation_key }}"
-    org_id: "{{ sat6_organization }}"
+  block:
+    - name: "Ensure subscription-manager-gnome is removed"
+      yum:
+        name: "subscription-manager-gnome"
+        state: "absent"
+      become: True
+
+    - name: "Migrate client to Satellite 6"
+      command: '/usr/sbin/rhn-migrate-classic-to-rhsm \
+                  --force --destination-url=https://{{ sat6_host }}:{{ sat6_rhsm_port }}/rhsm \
+                  --organization={{ sat6_organization }} \
+                  --activationkey={{ sat6_activation_key }} \
+                  {% if sat6_legacy_purge and sat6_legacy_user != "" and sat6_legacy_pass != "" %}
+                  --legacy-login={{ sat6_legacy_user }} \
+                  --legacy-password={{ sat6_legacy_pass }} \
+                  {% else %}
+                  --keep \
+                  {% endif %}
+               '
+
+    - name: "Configure subscription-manager base URL"
+      command: '/usr/sbin/subscription-manager config --rhsm.baseurl=https://{{ sat6_server }}/pulp/repos'
+
+    - name: "Configure subscription-manager release"
+      command: '/usr/sbin/subscription-manager release --set {{ sat6_os_release }}'
+      when: 'sat6_os_release != ""'
+
+    - name: "Ensure rhsmcertd is enabled and running"
+      service:
+        name: "rhsmcertd"
+        enabled: True
+        state: "restarted"
   become: True
 
 - name: "Enable specified repositories"
@@ -48,6 +102,12 @@
     state: "enabled"
   when: "sat6_enable_repos | length > 0"
   become: True
+
+- name: "Satellite 6 Puppet Configuration"
+  include_tasks: "puppet.yml"
+  tags:
+    - "puppet"
+  when: "(sat6_puppet) or (sat6_force_puppet)"
 
 - name: "Ensure katello-agent is installed"
   yum:
@@ -58,25 +118,9 @@
 - name: "Ensure goferd (katello-agent) is started and enabled"
   service:
     name: "goferd"
-    state: "started"
+    state: "restarted"
     enabled: True
   become: True
-
-- name: "Ensure subscription-manager-gnome is removed"
-  yum:
-    name: "subscription-manager-gnome"
-    state: "absent"
-  become: True
-
-- name: "Enable Remote Execution by Distributing foreman-proxy user's public key"
-  include_tasks: "rex.yml"
-  when: "sat6_remote_execution"
-
-- name: "Satellite 6 Puppet Configuration"
-  include_tasks: "puppet.yml"
-  tags:
-    - "puppet"
-  when: "(sat6_puppet) or (sat6_force_puppet)"
 
 - name: "Update Client System"
   yum:
@@ -84,3 +128,13 @@
     state: "latest"
   when: "sat6_update_client"
   become: True
+
+- name: "Ensure RHN Tools are removed"
+  yum:
+    name: "{{ sat6_rhn_tools }}"
+    state: "absent"
+  become: True
+
+- name: "Enable Remote Execution by Distributing foreman-proxy user's public key"
+  include_tasks: "rex.yml"
+  when: "sat6_remote_execution"
