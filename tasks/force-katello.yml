@@ -1,7 +1,19 @@
 ---
+# To ensure we properly rip out the Sat6 server/capsule specific CA
+- name: "Gather installed packages"
+  package_facts:
+
+# The following set_fact is being done with to_json | from_json due to an open bug:
+##  https://github.com/ansible/ansible/issues/27299
+- name: "Set detected Katello Packages"
+  set_fact:
+    detected_katello_pkgs: "{{ ansible_facts.packages | to_json | from_json | json_query(jq) | flatten }}"
+  vars:
+    jq: "*[?contains(name, 'katello') == `true`].name"
+
 - name: "Ensure Katello Packages are removed"
   yum:
-    name: "{{ sat6_katello_pkgs }}"
+    name: "{{ sat6_katello_pkgs | union(detected_katello_pkgs) }}"
     state: "absent"
   become: True
 
