@@ -7,6 +7,11 @@
     state: "latest"
   become: True
 
+- name: "Check for presence of Satellite 5/RHN systemid"
+  stat:
+    path: "/etc/sysconfig/rhn/systemid"
+  register: "sat5_systemid"
+
 - name: "Cleanup Katello"
   include_tasks: "force-katello.yml"
   when: "sat6_force_katello"
@@ -35,6 +40,7 @@
         ipv4: "{{ ansible_default_ipv4.address }}"
         location: "{{ sat6_location }}"
         register_only: True
+        force_host_update: "{{ sat6_update_existing }}"
 
 - name: "Ensure yum plugins are properly configured"
   block:
@@ -68,7 +74,7 @@
                   --force --destination-url=https://{{ sat6_server }}:{{ sat6_rhsm_port }}/rhsm \
                   --org={{ sat6_organization }} \
                   --activation-key={{ sat6_activation_key }} \
-                  {% if sat6_legacy_purge and sat6_legacy_user != "" and sat6_legacy_pass != "" %}
+                  {% if sat5_systemid.stat.exists and sat6_legacy_purge and sat6_legacy_user != "" and sat6_legacy_pass != "" %}
                   --legacy-user={{ sat6_legacy_user }} \
                   --legacy-password={{ sat6_legacy_pass }} \
                   {% else %}
@@ -134,6 +140,7 @@
     path: "/etc/sysconfig/rhn/systemid"
     state: "absent"
   become: True
+  when: "sat5_systemid.stat.exists"
 
 - name: "Enable Remote Execution by Distributing foreman-proxy user's public key"
   include_tasks: "rex.yml"
