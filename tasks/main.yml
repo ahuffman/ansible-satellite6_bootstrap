@@ -69,18 +69,39 @@
         state: "absent"
       become: True
 
+    # a lot can go wrong here
     - name: "Migrate client to Satellite 6"
-      command: '/usr/sbin/rhn-migrate-classic-to-rhsm \
-                  --force --destination-url=https://{{ sat6_server }}:{{ sat6_rhsm_port }}/rhsm \
-                  --org={{ sat6_organization }} \
-                  --activation-key={{ sat6_activation_key }} \
-                  {% if sat5_systemid.stat.exists and sat6_legacy_purge and sat6_legacy_user != "" and sat6_legacy_pass != "" %}
-                  --legacy-user={{ sat6_legacy_user }} \
-                  --legacy-password={{ sat6_legacy_pass }} \
-                  {% else %}
-                  --keep \
-                  {% endif %}
-               '
+      block:
+        - name: "Migrate client to Satellite 6"
+          command: '/usr/sbin/rhn-migrate-classic-to-rhsm \
+                      --force --destination-url=https://{{ sat6_server }}:{{ sat6_rhsm_port }}/rhsm \
+                      --org={{ sat6_organization }} \
+                      --activation-key={{ sat6_activation_key }} \
+                      {% if sat5_systemid.stat.exists and sat6_legacy_purge and sat6_legacy_user != "" and sat6_legacy_pass != "" %}
+                      --legacy-user={{ sat6_legacy_user }} \
+                      --legacy-password={{ sat6_legacy_pass }} \
+                      {% else %}
+                      --keep
+                      {% endif %}
+                  '
+          register: "migrate_command"
+      rescue:
+        - name: "Output rhn-migrate-classic-to-rhsm error"
+          debug:
+            var: "migrate_command.stderr_lines"
+
+        - debug:
+            msg:
+              - "Client is probably already migrated, let's try to carry on."
+
+        - meta: "clear_host_errors"
+
+        - name: "Ensure client is registered to Satellite 6"
+          redhat_subscription:
+            state: "present"
+            auto_attach: True
+            activationkey: "{{ sat6_activation_key }}"
+            org_id: "{{ sat6_organization }}"
 
     - name: "Configure subscription-manager base URL"
       command: '/usr/sbin/subscription-manager config --rhsm.baseurl=https://{{ sat6_server }}/pulp/repos'
