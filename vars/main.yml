@@ -22,10 +22,9 @@ sat6_sub_mgr_pkgs:
   - "openssl"
   - "python"
   - "subscription-manager"
-  - "subscription-manager-migration-*"
+  - "subscription-manager-migration"
 
 sat6_katello_pkgs:
-  - "katello-ca-consumer-*"
   - "katello-agent"
   - "gofer"
   - "katello-host-tools"
