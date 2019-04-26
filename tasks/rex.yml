@@ -6,7 +6,7 @@
     path: "{{ sat6_remote_execution_auth_key_path | default(omit) }}"
     state: "present"
   with_file:
-    - "{{ sat6_server }}-id_rsa_foreman_proxy.pub"
+    - "{{ sat6_capsule | default(sat6_server) }}-id_rsa_foreman_proxy.pub"
   tags:
     - "ssh-keys"
   become: True
