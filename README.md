@@ -11,7 +11,8 @@ The following variables are set in the role's `defaults/main.yml` file:
 
 | Variable Name | Required | Description | Default Value | Variable Type |
 | --- | :---: | :---: | --- | :---: |
-| sat6_server | yes | Hostname of the Satellite6 server. This can also be a Capsule server.| "" | string |
+| sat6_server | yes | Hostname of the "master" Satellite6 server (i.e. where content synchronizes to from Red Hat CDN). This cannot be a Capsule server.| "" | string |
+| sat6_capsule | no | If you require your clients to register to a Capsule server, this will be the Hostname of the Satellite6 capsule server to register to. If not provided, this will default to `sat6_server`.| N/A | string |
 | sat6_user | yes | Username of a Satellite 6 user that has permissions to create hosts, usually an admin user. | "" | string |
 | sat6_pass | yes | Password of the `sat6_user` that has permissions to create hosts, usually an admin user. | "" | string |
 | sat6_organization | yes | Organization to register the host in on the Satellite6 server.  This should be the Organization label found in Satellite 6.| "" | string |

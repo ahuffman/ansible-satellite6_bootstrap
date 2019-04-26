@@ -1,5 +1,6 @@
 ---
 sat6_server: ""
+#sat6_capsule: ""
 sat6_user: ""
 sat6_pass: ""
 sat6_organization: ""

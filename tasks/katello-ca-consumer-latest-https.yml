@@ -8,7 +8,7 @@
   block:
     - name: "Download CA Certificate"
       get_url:
-        url: "http://{{ sat6_server }}/pub/katello-server-ca.crt"
+        url: "http://{{ sat6_capsule | default(sat6_server) }}/pub/katello-server-ca.crt"
         dest: "/etc/pki/ca-trust/source/anchors/katello-server-ca.crt"
 
     - name: "Update CA trust"
@@ -18,6 +18,6 @@
 
 - name: "Ensure katello-ca-consumer-latest is installed | https"
   yum:
-    name: "https://{{ sat6_server }}/pub/katello-ca-consumer-latest.noarch.rpm"
+    name: "https://{{ sat6_capsule | default(sat6_server) }}/pub/katello-ca-consumer-latest.noarch.rpm"
     state: "present"
   become: True

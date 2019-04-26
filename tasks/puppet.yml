@@ -40,5 +40,5 @@
   become: True
 
 - name: "Puppet certificate signing request"
-  shell: 'puppet agent -t --server {{ sat6_server }}'
+  shell: 'puppet agent -t --server {{ sat6_capsule | default(sat6_server) }}'
   changed_when: False

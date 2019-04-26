@@ -22,10 +22,10 @@
     report = true
     ignoreschedules = true
     daemon = false
-    ca_server = {{ sat6_server }}
+    ca_server = {{ sat6_capsule | default(sat6_server) }}
     certname = {{ ansible_fqdn }}
     environment = {{ sat6_puppet_environment }}
-    server = {{ sat6_server }}
+    server = {{ sat6_capsule | default(sat6_server) }}
 
     # Where puppetd caches the local configuration.  An
     # extension indicating the cache format is added automatically.

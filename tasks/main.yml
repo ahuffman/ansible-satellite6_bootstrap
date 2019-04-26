@@ -18,7 +18,7 @@
 
 - name: "Ensure katello-ca-consumer-latest is installed"
   yum:
-    name: "http://{{ sat6_server }}/pub/katello-ca-consumer-latest.noarch.rpm"
+    name: "http://{{ sat6_capsule | default(sat6_server) }}/pub/katello-ca-consumer-latest.noarch.rpm"
     state: "present"
   when: "not sat6_https"
   become: True
@@ -74,7 +74,7 @@
       block:
         - name: "Migrate client to Satellite 6"
           command: '/usr/sbin/rhn-migrate-classic-to-rhsm \
-                      --force --destination-url=https://{{ sat6_server }}:{{ sat6_rhsm_port }}/rhsm \
+                      --force --destination-url=https://{{ sat6_capsule | default(sat6_server) }}:{{ sat6_rhsm_port }}/rhsm \
                       --org={{ sat6_organization }} \
                       --activation-key={{ sat6_activation_key }} \
                       {% if sat5_systemid.stat.exists and sat6_legacy_purge and sat6_legacy_user != "" and sat6_legacy_pass != "" %}
@@ -92,15 +92,8 @@
 
         - meta: "clear_host_errors"
 
-        - name: "Ensure client is registered to Satellite 6"
-          redhat_subscription:
-            state: "present"
-            auto_attach: True
-            activationkey: "{{ sat6_activation_key }}"
-            org_id: "{{ sat6_organization }}"
-
     - name: "Configure subscription-manager base URL"
-      command: '/usr/sbin/subscription-manager config --rhsm.baseurl=https://{{ sat6_server }}/pulp/repos'
+      command: '/usr/sbin/subscription-manager config --rhsm.baseurl=https://{{ sat6_capsule | default(sat6_server) }}/pulp/repos'
 
     - name: "Configure subscription-manager release"
       command: '/usr/sbin/subscription-manager release --set {{ sat6_os_release }}'
@@ -111,6 +104,13 @@
         name: "rhsmcertd"
         enabled: True
         state: "restarted"
+
+    - name: "Ensure client is registered to Satellite 6"
+      redhat_subscription:
+        state: "present"
+        auto_attach: True
+        activationkey: "{{ sat6_activation_key }}"
+        org_id: "{{ sat6_organization }}"
   become: True
 
 - name: "Enable specified repositories"
