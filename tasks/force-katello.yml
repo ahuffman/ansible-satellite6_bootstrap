@@ -22,3 +22,22 @@
     path: "/etc/rhsm/ca/katello-server-ca.pem"
     state: "absent"
   become: True
+
+- name: "Ensure cert.pem is removed"
+  file:
+    path: "/etc/pki/consumer/cert.pem"
+    state: "absent"
+
+- name: "Clean yum"
+  command: '/usr/bin/yum -y clean all'
+  become: True
+
+- name: "Unregister system"
+  command: '/usr/sbin/subscription-manager unregister'
+  become: True
+  ignore_errors: True
+
+- name: "Clean subscription-manager"
+  command: '/usr/sbin/subscription-manager clean'
+  become: True
+  ignore_errors: True
