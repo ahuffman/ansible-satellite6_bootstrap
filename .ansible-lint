@@ -1,0 +1,5 @@
+skip_list:
+  - "602" #python truthiness does not properly work in ansible
+  - "301" #we need to try to do things and not fail if they don't succeed (ie unreg or clean subscription-manager)
+  - "403" #we need latest utils, dumb rule
+  - "303" #yum module doesn't support 'clean all'
