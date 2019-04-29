@@ -11,17 +11,17 @@ The following variables are set in the role's `defaults/main.yml` file:
 
 | Variable Name | Required | Description | Default Value | Variable Type |
 | --- | :---: | :---: | --- | :---: |
-| sat6_server | yes | Hostname of the "master" Satellite6 server (i.e. where content synchronizes to from Red Hat CDN). This cannot be a Capsule server.| "" | string |
-| sat6_capsule | no | If you require your clients to register to a Capsule server, this will be the Hostname of the Satellite6 capsule server to register to. If not provided, this will default to `sat6_server`.| N/A | string |
+| sat6_server | yes | FQDN of the "master" Satellite6 server (i.e. where content synchronizes to from Red Hat CDN). This cannot be a Capsule server, as we require access to the Satellite6 API.| "" | string |
+| sat6_capsule | no | If you require your clients to register to a Capsule server, this will be the FQDN of the Satellite6 capsule server to register to. If not provided, this will default to `sat6_server` when not provided (i.e. clients will register to the `sat6_server`).| N/A | string |
 | sat6_user | yes | Username of a Satellite 6 user that has permissions to create hosts, usually an admin user. | "" | string |
 | sat6_pass | yes | Password of the `sat6_user` that has permissions to create hosts, usually an admin user. | "" | string |
 | sat6_organization | yes | Organization to register the host in on the Satellite6 server.  This should be the Organization label found in Satellite 6.| "" | string |
 | sat6_activation_key | yes | Activation key to use when registering the host with Satellite6. | "" | string |
 | sat6_location | no | Name of the location to register the host with in Satellite6.| "" | string |
 | sat6_enable_repos | no | List of repositories to enable after Satellite6.  registration is complete. | [] | list |
-| sat6_remote_execution | no | Place a file named `[sat6_server]-id_rsa_foreman_proxy.pub` in this role's `files` directory.  You can retrieve this file from your Satellite6 server. Please note that the filename prefix should match your Satellite6 or Capsule server name set with the `sat6_server` variable| False | boolean |
+| sat6_remote_execution | no | Place a file named `[sat6_server]-id_rsa_foreman_proxy.pub` in this role's `files` directory.  You can retrieve this file from your Satellite6 server. Please note that the filename prefix should match your Satellite6 or Capsule server name set with the `sat6_server` or `sat6_capsule` variable| False | boolean |
 | sat6_remote_execution_user | no | User account to install the Satellite6 remote execution key for. | "root" | string |
-| sat6_remote_execution_auth_key_path | no | Path to your authorized keys file if it is not /home/<user>/.ssh/authorized_keys. | "" | string |
+| sat6_remote_execution_auth_key_path | no | Path to your authorized keys file if it is not `/home/<user>/.ssh/authorized_keys`. | "" | string |
 | sat6_puppet | no | Whether or not to perform Puppet installation and configuration. | False | boolean |
 | sat6_puppet_environment | no | Puppet environment to configure the client's puppet agent with. | "production" | string |
 | sat6_force_puppet | no | Whether or not to force an uninstall and cleanup of a client's puppet agent and configuration. | False | boolean |
@@ -71,7 +71,7 @@ Please note that `ahuffman.sat6_create_hosts` depends on `ahuffman.api` and will
       sat6_legacy_pass: "{{ sat5_legacy_user_pass_from_vault }}"
       sat6_activation_key: "mykey1"
       sat6_organization: "myorg1"
-      sat6_update_existing: True
+      sat6_update_existing: True #force existing sat6 host to be updated to what we've specified
       sat6_update_client: True #patch the system post registration
       sat6_enable_repos:
         - "rhel-7-server-optional-rpms"
