@@ -140,6 +140,10 @@
     enabled: True
   become: True
 
+- name: "Ensure yum is cleaned"
+  command: '/usr/bin/yum clean all'
+  become: True
+
 - name: "Update Client System"
   yum:
     name: "*"
