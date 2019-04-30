@@ -18,6 +18,6 @@ sat6_https: False
 sat6_legacy_purge: False
 sat6_legacy_user: ""
 sat6_legacy_pass: ""
-sat6_rhsm_port: "443"
+sat6_rhsm_port: "8443"
 sat6_os_release: ""
 sat6_update_existing: False
