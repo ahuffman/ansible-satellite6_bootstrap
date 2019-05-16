@@ -52,9 +52,6 @@ To install the required Role, `ansible-galaxy install ahuffman.sat6_create_hosts
 
 With Ansible Tower/AWX this dependency could be specified in `requirements.yml` to avoid pre-installation.
 
-Please note that `ahuffman.sat6_create_hosts` depends on `ahuffman.api` and will be auto-installed with the above `ansible-galaxy` command.
-
-
 ## Example Playbook
 ```yaml
 ---
