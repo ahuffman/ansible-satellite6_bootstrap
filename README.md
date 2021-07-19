@@ -1,3 +1,5 @@
+![Ansible Role](https://img.shields.io/ansible/role/d/39179)
+
 # ahuffman.satellite6_bootstrap
 
 To provide a method to painlessly migrate Satellite 5 clients to Satellite 6 by making use of Ansible.  This role also provides for the initial registration of clients to Satellite6 or for re-registration of clients from an existing Satellite6 server.  The role ensures all RHN (Satellite5) specific components are removed as part of the process.
